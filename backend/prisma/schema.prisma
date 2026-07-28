@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DrawResultType {
+  WIN
+  LOSS
+}
+
+model AdminUser {
+  id                 String    @id @default(uuid())
+  name               String
+  email              String    @unique
+  passwordHash       String
+  role               String    @default("admin")
+  tokenVersion       Int       @default(0)
+  mustChangePassword Boolean   @default(true)
+  lastLoginAt        DateTime?
+  passwordChangedAt  DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Participant {
+  id               String   @id @default(uuid())
+  name             String
+  phone            String
+  normalizedPhone  String
+  gameConsent      Boolean
+  marketingConsent Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  draws            Draw[]
+
+  @@index([normalizedPhone, createdAt])
+}
+
+model Prize {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  imageUrl       String?
+  probability    Float
+  initialStock   Int
+  remainingStock Int
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  draws          Draw[]
+
+  @@index([isActive, remainingStock])
+}
+
+model Draw {
+  id               String         @id @default(uuid())
+  participantId    String
+  participant      Participant    @relation(fields: [participantId], references: [id])
+  prizeId          String?
+  prize            Prize?         @relation(fields: [prizeId], references: [id])
+  resultType       DrawResultType
+  isPrizeDelivered Boolean        @default(false)
+  deliveredAt      DateTime?
+  createdAt        DateTime       @default(now())
+
+  @@index([createdAt])
+  @@index([resultType])
+}
+
+model GameSettings {
+  id                  String   @id @default(uuid())
+  gameName            String   @default("Jeu promotionnel")
+  welcomeMessage      String   @default("Bienvenue dans notre jeu promotionnel")
+  loseMessage         String   @default("Dommage, cette fois-ci vous n'avez pas gagné")
+  participationPeriod String   @default("daily")
+  isGameActive        Boolean  @default(false)
+  returnDelaySeconds  Int      @default(5)
+  privacyPolicyUrl    String?
+  rulesUrl            String?
+  updatedAt           DateTime @updatedAt
+}

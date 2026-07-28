@@ -1,0 +1,39 @@
+{
+  "name": "restaurant-game-backend",
+  "version": "1.0.0",
+  "description": "Backend Express pour l'application de jeu promotionnel du restaurant",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "node src/utils/seed.js",
+    "db:import": "node src/utils/import-dev-store.js",
+    "db:status": "node src/utils/db-status.js",
+    "admin:reset-password": "powershell -ExecutionPolicy Bypass -File reset-admin-password.ps1",
+    "db:backup": "powershell -ExecutionPolicy Bypass -File backup-postgres.ps1",
+    "db:backup:install": "powershell -ExecutionPolicy Bypass -File install-backup-task.ps1",
+    "setup": "powershell -ExecutionPolicy Bypass -File setup-postgres.ps1"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.1.0",
+    "bcryptjs": "^2.1.1",
+    "cors": "^2.8.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.0.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.1",
+    "prisma": "^6.1.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "prisma": {
+    "seed": "node src/utils/seed.js"
+  }
+}
