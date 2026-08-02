@@ -6,7 +6,6 @@ const {
   getSession,
   getDashboard,
   getPrizes,
-  getParticipants,
   getDraws,
   getSettings,
   updateSettings,
@@ -41,7 +40,6 @@ router.get('/admin/dashboard', getDashboard);
 router.get('/admin/prizes', getPrizes);
 router.post('/admin/prizes', createPrize);
 router.put('/admin/prizes/:id', updatePrize);
-router.get('/admin/participants', getParticipants);
 router.get('/admin/draws', getDraws);
 router.get('/admin/settings', getSettings);
 router.put('/admin/settings', updateSettings);

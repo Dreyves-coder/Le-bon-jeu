@@ -7,7 +7,6 @@ import ResultPage from './pages/ResultPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminPrizesPage from './pages/AdminPrizesPage';
-import AdminParticipantsPage from './pages/AdminParticipantsPage';
 import AdminDrawsPage from './pages/AdminDrawsPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminSecurityPage from './pages/AdminSecurityPage';
@@ -29,7 +28,6 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/lots" element={<AdminPrizesPage />} />
-          <Route path="/admin/participants" element={<AdminParticipantsPage />} />
           <Route path="/admin/tirages" element={<AdminDrawsPage />} />
           <Route path="/admin/parametres" element={<AdminSettingsPage />} />
           <Route path="/admin/securite" element={<AdminSecurityPage />} />

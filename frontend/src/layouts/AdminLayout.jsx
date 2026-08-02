@@ -6,7 +6,6 @@ import mahanaLogo from '../assets/Image mahana.png';
 const navigation = [
   ['Tableau de bord', '/admin'],
   ['Lots & stocks', '/admin/lots'],
-  ['Participants', '/admin/participants'],
   ['Historique', '/admin/tirages'],
   ['Autoriser une partie', '/admin/parametres'],
   ['Sécurité', '/admin/securite'],
