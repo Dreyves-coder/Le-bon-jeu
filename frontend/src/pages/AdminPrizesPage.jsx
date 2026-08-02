@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import api from '../services/api';
 
 const emptyForm = { name: '', description: '', probability: 10, initialStock: 10, isActive: true };
@@ -9,6 +10,7 @@ export default function AdminPrizesPage() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updatingPrizeId, setUpdatingPrizeId] = useState('');
+  const [prizeToDelete, setPrizeToDelete] = useState(null);
   const [message, setMessage] = useState('');
 
   async function loadPrizes() {
@@ -77,6 +79,23 @@ export default function AdminPrizesPage() {
     }
   }
 
+  async function deletePrize(prize) {
+    setMessage('');
+    setUpdatingPrizeId(prize.id);
+    try {
+      const response = await api.put(`/admin/prizes/${prize.id}`, { _delete: true });
+      setPrizes((current) => current.filter((item) => item.id !== prize.id));
+      setPrizeToDelete(null);
+      setMessage(response.data.message || 'Lot supprimé définitivement.');
+    } catch (error) {
+      setMessage(error.response?.data?.message || 'La suppression du lot a échoué.');
+      setPrizeToDelete(null);
+      await loadPrizes();
+    } finally {
+      setUpdatingPrizeId('');
+    }
+  }
+
   async function adjustProbability(id, amount) {
     const input = document.getElementById(`prob-${id}`);
     if (!input || updatingPrizeId === id) return;
@@ -122,11 +141,12 @@ export default function AdminPrizesPage() {
           const stockThreshold = Math.max(2, Math.ceil(prize.initialStock * 0.2));
           const outOfStock = prize.remainingStock === 0;
           const lowStock = !outOfStock && prize.remainingStock <= stockThreshold;
+          const isUpdating = updatingPrizeId === prize.id;
           return (
             <article className={`prize-admin-card ${!prize.isActive ? 'disabled' : ''} ${outOfStock ? 'out-of-stock' : ''} ${lowStock ? 'low-stock' : ''}`} key={prize.id}>
               <div className="prize-card-top"><div><h3>{prize.name}</h3><p>{prize.description || 'Aucune description'}</p></div>
                 <button className={`status-chip ${prize.isActive ? 'active' : ''} ${outOfStock ? 'empty' : ''}`}
-                  disabled={outOfStock} onClick={() => updatePrize(prize.id, { isActive: !prize.isActive })}>
+                  disabled={outOfStock || isUpdating} onClick={() => updatePrize(prize.id, { isActive: !prize.isActive })}>
                   {outOfStock ? 'Épuisé' : prize.isActive ? 'Actif' : 'Inactif'}
                 </button>
               </div>
@@ -137,7 +157,7 @@ export default function AdminPrizesPage() {
               <div className="prize-actions">
                 <label>Probabilité
                   <div className="probability-stepper">
-                    <button type="button" disabled={updatingPrizeId === prize.id} aria-label={`Diminuer la probabilité de ${prize.name}`}
+                    <button type="button" disabled={isUpdating} aria-label={`Diminuer la probabilité de ${prize.name}`}
                       onPointerDown={(event) => event.preventDefault()} onClick={() => adjustProbability(prize.id, -1)}>−</button>
                     <input type="number" min="0" max="100" step="0.1" defaultValue={percent} id={`prob-${prize.id}`} inputMode="decimal"
                       onBlur={(event) => saveProbability(prize.id, event.target.value)}
@@ -148,23 +168,44 @@ export default function AdminPrizesPage() {
                         }
                       }} />
                     <span>%</span>
-                    <button type="button" disabled={updatingPrizeId === prize.id} aria-label={`Augmenter la probabilité de ${prize.name}`}
+                    <button type="button" disabled={isUpdating} aria-label={`Augmenter la probabilité de ${prize.name}`}
                       onPointerDown={(event) => event.preventDefault()} onClick={() => adjustProbability(prize.id, 1)}>+</button>
                   </div>
                 </label>
                 <label>Stock
                   <input type="number" min="0" step="1" defaultValue={prize.remainingStock} id={`stock-${prize.id}`} />
                 </label>
-                <button onClick={() => updatePrize(prize.id, {
-                  probability: Number(document.getElementById(`prob-${prize.id}`).value) / 100,
-                  remainingStock: Number(document.getElementById(`stock-${prize.id}`).value),
-                })}>Enregistrer</button>
+                <button
+                  style={{ gridColumn: '1 / 2' }}
+                  disabled={isUpdating}
+                  onClick={() => updatePrize(prize.id, {
+                    probability: Number(document.getElementById(`prob-${prize.id}`).value) / 100,
+                    remainingStock: Number(document.getElementById(`stock-${prize.id}`).value),
+                  })}
+                >
+                  {isUpdating ? 'Traitement…' : 'Enregistrer'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() => setPrizeToDelete(prize)}
+                  style={{ background: '#a23f37', gridColumn: '2 / 3' }}
+                >
+                  Supprimer le lot
+                </button>
               </div>
             </article>
           );
         })}
       </div>
       {!prizes.length ? <div className="empty-state">Aucun lot enregistré. Ajoutez votre premier cadeau.</div> : null}
+
+      <ConfirmDeleteModal
+        prize={prizeToDelete}
+        loading={Boolean(prizeToDelete && updatingPrizeId === prizeToDelete.id)}
+        onCancel={() => setPrizeToDelete(null)}
+        onConfirm={() => deletePrize(prizeToDelete)}
+      />
     </div>
   );
 }

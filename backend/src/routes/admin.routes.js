@@ -6,7 +6,6 @@ const {
   getSession,
   getDashboard,
   getPrizes,
-  createPrize,
   updatePrize,
   getParticipants,
   getDraws,
@@ -15,6 +14,7 @@ const {
   changePassword,
   changeEmail,
 } = require('../controllers/admin.controller');
+const { createPrize } = require('../controllers/prize-create.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = express.Router();

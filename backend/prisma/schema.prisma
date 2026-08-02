@@ -41,19 +41,21 @@ model Participant {
 }
 
 model Prize {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   name           String
   description    String?
   imageUrl       String?
   probability    Float
   initialStock   Int
   remainingStock Int
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  isActive       Boolean   @default(true)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   draws          Draw[]
 
   @@index([isActive, remainingStock])
+  @@index([deletedAt])
 }
 
 model Draw {

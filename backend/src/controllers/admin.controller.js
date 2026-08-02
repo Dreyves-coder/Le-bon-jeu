@@ -68,18 +68,19 @@ async function changeEmail(req, res, next) {
 
 async function getDashboard(_req, res, next) {
   try {
+    const availablePrizeFilter = { deletedAt: null };
     const [participantsCount, drawsCount, winnersCount, activePrizesCount, stock, recentDraws, allPrizes] = await Promise.all([
       prisma.participant.count(),
       prisma.draw.count(),
       prisma.draw.count({ where: { resultType: 'WIN' } }),
-      prisma.prize.count({ where: { isActive: true, remainingStock: { gt: 0 } } }),
-      prisma.prize.aggregate({ _sum: { remainingStock: true } }),
+      prisma.prize.count({ where: { ...availablePrizeFilter, isActive: true, remainingStock: { gt: 0 } } }),
+      prisma.prize.aggregate({ where: availablePrizeFilter, _sum: { remainingStock: true } }),
       prisma.draw.findMany({
         take: 6,
         orderBy: { createdAt: 'desc' },
         include: { participant: true, prize: true },
       }),
-      prisma.prize.findMany(),
+      prisma.prize.findMany({ where: availablePrizeFilter }),
     ]);
     const lowStockPrizes = allPrizes.filter((prize) => {
       const threshold = Math.max(2, Math.ceil(prize.initialStock * 0.2));
@@ -117,7 +118,11 @@ async function getDashboard(_req, res, next) {
 
 async function getPrizes(_req, res, next) {
   try {
-    return res.json({ success: true, data: await prisma.prize.findMany({ orderBy: { createdAt: 'asc' } }) });
+    const prizes = await prisma.prize.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+    });
+    return res.json({ success: true, data: prizes });
   } catch (error) {
     if (devStorage.isDevelopmentFallbackEnabled()) return res.json({ success: true, data: devStorage.getPrizes() });
     next(error);
@@ -151,7 +156,39 @@ async function createPrize(req, res, next) {
   }
 }
 
+async function archivePrize(id, res) {
+  const prize = await prisma.prize.findFirst({ where: { id, deletedAt: null } });
+  if (!prize) {
+    return res.status(404).json({ success: false, message: 'Lot introuvable.' });
+  }
+
+  await prisma.prize.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+      isActive: false,
+      probability: 0,
+      remainingStock: 0,
+    },
+  });
+  return res.json({ success: true, message: 'Lot supprimé du catalogue.' });
+}
+
 async function updatePrize(req, res, next) {
+  if (req.body?._delete === true) {
+    if (devStorage.isDevelopmentFallbackEnabled()) {
+      return res.status(503).json({
+        success: false,
+        message: 'La suppression nécessite une connexion à PostgreSQL.',
+      });
+    }
+    try {
+      return await archivePrize(req.params.id, res);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   if (devStorage.isDevelopmentFallbackEnabled()) {
     const prizes = devStorage.getPrizes();
     const current = prizes.find((prize) => prize.id === req.params.id);
@@ -174,7 +211,10 @@ async function updatePrize(req, res, next) {
       data.remainingStock = 0;
       data.isActive = false;
     }
-    return res.json({ success: true, data: await prisma.prize.update({ where: { id: req.params.id }, data }) });
+    return res.json({
+      success: true,
+      data: await prisma.prize.update({ where: { id: req.params.id, deletedAt: null }, data }),
+    });
   } catch (error) {
     if (devStorage.isDevelopmentFallbackEnabled()) {
       const prize = devStorage.updatePrize(req.params.id, req.body);
