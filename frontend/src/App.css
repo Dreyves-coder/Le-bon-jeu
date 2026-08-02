@@ -62,6 +62,13 @@ h1, h2, p { margin-top: 0; }
 .home-cta span:last-child { font-size: 23px; font-weight: 400; }
 .hint { margin: 32px 0 0; color: #ddd7ca; font-size: 13px; }
 .hint span { color: var(--gold); }
+.pwa-install { width: min(360px, 100%); margin-top: 14px; }
+.pwa-install-button {
+  width: 100%; min-height: 44px; padding: 0 18px; border: 1px solid rgba(247,206,120,.4); border-radius: 12px;
+  background: rgba(10,12,12,.72); color: var(--gold-light); font-weight: 700; cursor: pointer;
+}
+.pwa-install-button:hover { background: rgba(231,173,67,.12); }
+.pwa-install p { margin: 9px 0 0; color: #ddd7ca; font-size: 12px; line-height: 1.45; }
 .waiting-status {
   min-height: 58px; width: min(360px, 100%); padding: 0 22px; display: flex; align-items: center; justify-content: center; gap: 12px;
   border: 1px solid rgba(255,255,255,.16); border-radius: 14px; background: rgba(10,12,12,.66); color: #d5d9d6; font-size: 13px; font-weight: 700;

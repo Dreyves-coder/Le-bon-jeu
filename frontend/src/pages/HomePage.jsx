@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import api from '../services/api';
 import mahanaLogo from '../assets/Image mahana.png';
+import InstallPwaButton from '../components/InstallPwaButton';
 
 export default function HomePage() {
   const [gameState, setGameState] = useState({ loading: true, active: false, connected: true });
@@ -47,6 +48,7 @@ export default function HomePage() {
           ) : (
             <div className="waiting-status"><span className={gameState.connected ? 'pulse' : 'offline'} />{gameState.connected ? 'En attente d’activation' : 'Serveur déconnecté'}</div>
           )}
+          <InstallPwaButton />
           <p className="hint"><span>✦</span> Bonne chance&nbsp;!</p>
         </div>
       </div>

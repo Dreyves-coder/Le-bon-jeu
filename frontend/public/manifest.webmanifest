@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Mahana Win",
+  "short_name": "Mahana Win",
+  "description": "La roue des cadeaux Mahana.",
+  "lang": "fr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#090b0b",
+  "theme_color": "#111515",
+  "categories": ["entertainment", "food"],
+  "icons": [
+    {
+      "src": "/mahana-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Jeu client",
+      "short_name": "Jeu",
+      "url": "/"
+    },
+    {
+      "name": "Administration",
+      "short_name": "Admin",
+      "url": "/admin/login"
+    }
+  ]
+}
