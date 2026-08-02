@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import api from '../services/api';
 import mahanaLogo from '../assets/Image mahana.png';
 
